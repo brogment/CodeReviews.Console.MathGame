@@ -2,9 +2,8 @@
 
 string? readResult;
 Random random = new Random();
-
-int firstOperand = random.Next();
-int secondOperand = random.Next();
+int firstOperand;
+int secondOperand;
 
 do
 {
@@ -23,14 +22,27 @@ do
     switch (readResult)
     {
         case "1":
-            break;
         case "2":
-            break;
         case "3":
-            break;
-        case "4":
+            firstOperand = random.Next(100);
+            secondOperand = random.Next(100);
             break;
 
+
+        case "4":
+            firstOperand = random.Next(100);
+            do
+            {
+                secondOperand = random.Next(firstOperand);
+            }
+            while (firstOperand % secondOperand != 0);
+            break;
+        case "q":
+            Console.WriteLine("Exiting Program...");
+            break;
+        default:
+            Console.WriteLine("Please select an operation.");
+            break;
     }
 
 
@@ -38,7 +50,7 @@ do
 while (readResult != "q");
 
 
-static string PerformOperation()
+static string PerformOperation(string operater, int firstOperand, int SecondOperand)
 {
     return "";
 }
