@@ -1,9 +1,12 @@
 ﻿
+Random random = new Random();
 
 string? readResult;
-Random random = new Random();
+
 int firstOperand;
 int secondOperand;
+int maxOperandRange = 100;
+int correctAnswer;
 
 do
 {
@@ -14,43 +17,54 @@ do
 (4) Division
 
 (Q) Quit Program");
-
-
+    
     readResult = Console.ReadLine();
-    readResult = readResult?.ToLower();
-
-    switch (readResult)
+    if (readResult != null)
     {
-        case "1":
-        case "2":
-        case "3":
-            firstOperand = random.Next(100);
-            secondOperand = random.Next(100);
-            break;
+        if ("1234".Contains(readResult) && readResult.Length == 1)
+        {
 
-
-        case "4":
-            firstOperand = random.Next(100);
-            do
+            firstOperand = random.Next(maxOperandRange);
+            if (readResult == "4")
             {
-                secondOperand = random.Next(firstOperand);
+                do
+                {
+                    secondOperand = random.Next(firstOperand/2 + 1); // optimizing finding second operand
+                }
+                while (firstOperand % secondOperand != 0);
+            } else
+            {
+                secondOperand = random.Next(maxOperandRange);
             }
-            while (firstOperand % secondOperand != 0);
+
+            correctAnswer = PerformOperation(readResult, firstOperand, secondOperand);
+            Console.WriteLine($"What is the result of "); // need a dict that maps number choice selection to operation symbol
+
+        } else if (readResult.ToLower() == "q")
+        {
+            Console.WriteLine("Exiting program...");
             break;
-        case "q":
-            Console.WriteLine("Exiting Program...");
-            break;
-        default:
-            Console.WriteLine("Please select an operation.");
-            break;
+        }
     }
 
+    Console.WriteLine("Please select an option.");
 
 }
-while (readResult != "q");
+while (true);
 
 
-static string PerformOperation(string operater, int firstOperand, int SecondOperand)
+static int PerformOperation(string operatorSymbol, int firstOperand, int secondOperand)
 {
-    return "";
+    if (operatorSymbol == "+")
+        return firstOperand + secondOperand;
+    else if (operatorSymbol == "-")
+        return firstOperand - secondOperand;
+    else if (operatorSymbol == "*")
+        return firstOperand * secondOperand;
+    else if (operatorSymbol == "/")
+        return firstOperand / secondOperand;
+    else
+        return 0;
+
+    
 }
