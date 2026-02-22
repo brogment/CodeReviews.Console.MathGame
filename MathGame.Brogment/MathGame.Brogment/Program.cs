@@ -1,13 +1,27 @@
 ﻿
+using MathGame.Brogment;
+using System.Text;
+
 /*
  
 Make option for timed gamemode where each question is timed, and they fail question if they go over time?
- 
+
+below isn't working, should make checkmark and big X work?
+Console.OutputEncoding = Encoding.UTF8;
+
  */
-using System.Text;
 
-// not working Console.OutputEncoding = Encoding.UTF8;
 
+Console.WriteLine("Please enter your name");
+string playerName = Console.ReadLine() ?? "Player1";
+
+Console.WriteLine(@"Choose a gametype:
+(1) Standard
+(2) Random Operations");
+
+string gameTypeCode = ProcessKey("12");
+
+//Player player = new Player(playerName);
 
 var gameHistory = new List<string>();
 
@@ -24,8 +38,6 @@ static void SingleGame(int roundCount, List<string>? gameHistory)
     PrintGames(gameHistory);
 }
 
-
-
 static void SingleRound(List<string>? gameHistory)
 {
     Random random = new Random();
@@ -37,55 +49,37 @@ static void SingleRound(List<string>? gameHistory)
     int maxOperandRange = 100;
     int correctAnswer;
     string currOperator;
-    int playerScore = 0;
 
-
-
-    var operatorMap = new Dictionary<string, string>()
-{
-    {"1", "+" },
-    {"2", "-"},
-    {"3", "*"},
-    {"4", "/" }
-};
-
-    bool validInput = false;
-
-    do
-    {
-        Console.WriteLine("Enter the number key next to the operation you wish to solve: ");
-        Console.WriteLine(@"(1) Addition
+    Console.WriteLine("Enter the number key next to the operation you wish to solve: ");
+    Console.WriteLine(@"(1) Addition
 (2) Subtraction
 (3) Multiplication
 (4) Division");
 
-        readResult = Console.ReadLine();
+    readResult = ProcessKey("1234");
 
-        if (readResult != null)
-        {
-            if ("1234".Contains(readResult) && readResult.Length == 1)
-                validInput = true;
-        }
-        else
-            Console.WriteLine("Please select an option.");
+    if (readResult == "1")
+        currOperator = "+";
+    else if (readResult == "2")
+        currOperator = "-";
+    else if (readResult == "3")
+        currOperator = "*";
+    else
+        currOperator = "/";
 
-    }
-    while (!validInput);
 
     firstOperand = random.Next(maxOperandRange);
 
-    if (readResult == "4")
+    if (currOperator == "/")
     {
         do
         {
-            secondOperand = random.Next(1, firstOperand / 2 + 1); // optimizing finding second operand
+            secondOperand = random.Next(1, firstOperand / 2 + 1);
         }
         while (firstOperand % secondOperand != 0);
     }
     else
         secondOperand = random.Next(maxOperandRange);
-
-    currOperator = operatorMap[readResult];
 
     correctAnswer = PerformOperation(currOperator, firstOperand, secondOperand);
 
@@ -103,35 +97,25 @@ static void SingleRound(List<string>? gameHistory)
 
 
     if (userAnswer == correctAnswer)
-    {
-        playerScore++;
         Console.WriteLine("Correct!");
-    }
     else
         Console.WriteLine("Incorrect!");
 
     gameHistory.Add($"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer} {(userAnswer == correctAnswer ? "U+2713" : "U+FF38")}");
-
-
 }
 
-
-
-
-static int PerformOperation(string operatorSymbol, int firstOperand, int secondOperand)
+static int PerformOperation(string operationSelection, int firstOperand, int secondOperand)
 {
-    if (operatorSymbol == "+")
+    if (operationSelection == "+")
         return firstOperand + secondOperand;
-    else if (operatorSymbol == "-")
+    else if (operationSelection == "-")
         return firstOperand - secondOperand;
-    else if (operatorSymbol == "*")
+    else if (operationSelection == "*")
         return firstOperand * secondOperand;
-    else if (operatorSymbol == "/")
+    else if (operationSelection == "/")
         return firstOperand / secondOperand;
     else
         return 0;
-
-
 }
 
 static void PrintGames(List<string> gameHistory)
@@ -139,5 +123,21 @@ static void PrintGames(List<string> gameHistory)
     foreach (var game in gameHistory)
     {
         Console.WriteLine(game);
+    }
+}
+
+static string ProcessKey(string validInputs)
+{
+    string? keyValue;
+    while(true)
+    {
+        ConsoleKeyInfo keyPressed = Console.ReadKey();
+        Console.WriteLine();
+        keyValue = keyPressed.KeyChar.ToString();
+
+        if (validInputs.Contains(keyValue))
+        {
+            return keyValue;
+        }
     }
 }
