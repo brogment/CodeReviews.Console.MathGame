@@ -15,5 +15,29 @@ namespace MathGame.Brogment
             this.name = name;
         }
 
+        public void IncreaseScore()
+        {
+            score += 1;
+        }
+        public void UpdateGameHistory(string game)
+        {
+            gameHistory.Add(game);
+        }
+
+        public void PrintGames()
+        {
+            foreach (var game in gameHistory)
+            {
+                Console.WriteLine(game);
+            }
+        }
+        public void PrintScore()
+        {
+            Console.WriteLine($"Score: {score}");
+        }
+        public void SetScore(int newScore)
+        {
+            score = newScore;
+        }
     }
 }

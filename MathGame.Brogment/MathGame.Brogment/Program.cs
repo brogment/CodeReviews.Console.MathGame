@@ -5,6 +5,8 @@ using System.Text;
 /*
  
 Make option for timed gamemode where each question is timed, and they fail question if they go over time?
+Should add a continue option so they don't have to reenter game options if they want to play the same game over and over
+alternatively making it so you could return to menu at any time and change options
 
 below isn't working, should make checkmark and big X work?
 Console.OutputEncoding = Encoding.UTF8;
@@ -15,60 +17,87 @@ Console.OutputEncoding = Encoding.UTF8;
 Console.WriteLine("Please enter your name");
 string playerName = Console.ReadLine() ?? "Player1";
 
-Console.WriteLine(@"Choose a gametype:
+Player player = new Player(playerName);
+while (true)
+{
+    Console.WriteLine(@"(1) Continue
+(2) Change Settings
+(3) Exit Program");
+
+    string input = ProcessKey("123");
+
+    if (input == "1")
+        SingleGame(player);
+    else if (input == "2")
+        ChangeSettings();
+    else
+        break;
+}
+
+SingleGame(player);
+
+
+//putting chooseing options into own method, dict maybe I can pass to game in infinite loop?
+
+
+
+static void SingleGame(Player player)
+{
+
+    Console.WriteLine(@"Choose a gametype:
 (1) Standard
 (2) Random Operations");
 
-string gameTypeCode = ProcessKey("12");
+    string gameTypeCode = ProcessKey("12");
 
-//Player player = new Player(playerName);
+    Console.WriteLine(@"Choose a difficulty:
+(1) Easy   <  5  Rounds >
+(2) Medium <  8  Rounds > 
+(3) Hard   < 10  Rounds >");
 
-var gameHistory = new List<string>();
+    string difficulty = ProcessKey("123");
 
-SingleGame(5, gameHistory);
+    int roundCount = difficulty == "1" ? 5 : difficulty == "2" ? 8 : 10;
+    int maxOperandRange = difficulty == "1" ? 100 : difficulty == "2" ? 250 : 1000;
 
-
-static void SingleGame(int roundCount, List<string>? gameHistory)
-{
     for (int i = 0; i < roundCount; i++)
     {
-        SingleRound(gameHistory);
-    }
+        SingleRound(player, gameTypeCode, maxOperandRange);
 
-    PrintGames(gameHistory);
+    }
+    player.PrintGames();
+    player.PrintScore();
+    player.SetScore(0);
+
+
 }
 
-static void SingleRound(List<string>? gameHistory)
+static void SingleRound(Player player, string gameTypeCode, int maxOperandRange)
 {
     Random random = new Random();
 
-    string? readResult;
-
-    int firstOperand;
-    int secondOperand;
-    int maxOperandRange = 100;
-    int correctAnswer;
     string currOperator;
+    var operations = new[] {"+", "-", "*", "/"};
 
-    Console.WriteLine("Enter the number key next to the operation you wish to solve: ");
-    Console.WriteLine(@"(1) Addition
+    if (gameTypeCode == "1")
+    {
+        Console.WriteLine("Enter the number key next to the operation you wish to solve: ");
+        Console.WriteLine(@"(1) Addition
 (2) Subtraction
 (3) Multiplication
 (4) Division");
 
-    readResult = ProcessKey("1234");
-
-    if (readResult == "1")
-        currOperator = "+";
-    else if (readResult == "2")
-        currOperator = "-";
-    else if (readResult == "3")
-        currOperator = "*";
+        string input = ProcessKey("1234");
+        currOperator = operations[int.Parse(input) - 1];
+    }
     else
-        currOperator = "/";
+    {
+        currOperator = operations[random.Next(0, operations.Length)];
+    }
 
 
-    firstOperand = random.Next(maxOperandRange);
+    int firstOperand = random.Next(maxOperandRange);
+    int secondOperand;
 
     if (currOperator == "/")
     {
@@ -81,7 +110,7 @@ static void SingleRound(List<string>? gameHistory)
     else
         secondOperand = random.Next(maxOperandRange);
 
-    correctAnswer = PerformOperation(currOperator, firstOperand, secondOperand);
+    int correctAnswer = PerformOperation(currOperator, firstOperand, secondOperand);
 
     Console.WriteLine($"What is the result of {firstOperand} {currOperator} {secondOperand} ? ");
 
@@ -97,11 +126,14 @@ static void SingleRound(List<string>? gameHistory)
 
 
     if (userAnswer == correctAnswer)
+    {
         Console.WriteLine("Correct!");
+        player.IncreaseScore();
+    }
     else
         Console.WriteLine("Incorrect!");
 
-    gameHistory.Add($"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer} {(userAnswer == correctAnswer ? "U+2713" : "U+FF38")}");
+    player.UpdateGameHistory($"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer} {(userAnswer == correctAnswer ? "U+2713" : "U+FF38")}");
 }
 
 static int PerformOperation(string operationSelection, int firstOperand, int secondOperand)
@@ -116,14 +148,6 @@ static int PerformOperation(string operationSelection, int firstOperand, int sec
         return firstOperand / secondOperand;
     else
         return 0;
-}
-
-static void PrintGames(List<string> gameHistory)
-{
-    foreach (var game in gameHistory)
-    {
-        Console.WriteLine(game);
-    }
 }
 
 static string ProcessKey(string validInputs)
