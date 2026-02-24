@@ -1,6 +1,9 @@
 ﻿
 using MathGame.Brogment;
-using System.Text;
+
+//why are the below present
+//using System.Collections.ObjectModel;
+//using System.Text;
 
 /*
  
@@ -11,80 +14,111 @@ Console.OutputEncoding = Encoding.UTF8;
 
  */
 
-/*use a mix of enum and struct to represent difficulties*/
+
 
 Console.WriteLine("Please enter your name");
 string playerName = Console.ReadLine() ?? "Player1";
 
 Player player = new Player(playerName);
 
-string difficulty = "1";
-string gameTypeCode = "1";
+var difficultyMap = new Dictionary<Difficulty, DifficultySettings>
+{
+    [Difficulty.Easy] = new DifficultySettings { keyboardKey = "1", difficultyName = "Easy", maxOperandRange = 100, roundcount = 5},
+    [Difficulty.Medium] = new DifficultySettings { keyboardKey = "2", difficultyName = "Medium", maxOperandRange = 250, roundcount = 8},
+    [Difficulty.Hard] = new DifficultySettings { keyboardKey = "3", difficultyName = "Hard", maxOperandRange = 1000, roundcount = 10}
+};
+
+var gameTypeMap = new Dictionary<GameType, GameTypeSettings>
+{
+    [GameType.Standard] = new GameTypeSettings { keyboardKey = "1", gameTypeName = "Standard" },
+    [GameType.Random] = new GameTypeSettings { keyboardKey = "2", gameTypeName = "Random Operations" }
+};
+
+GameTypeSettings currentGameType = gameTypeMap[GameType.Standard];
+DifficultySettings currentDifficulty = difficultyMap[Difficulty.Easy];
 
 while (true)
 {
-    Console.WriteLine(@"(1) Start Game
-(2) Change Difficulty
-(3) Change Game Type
+    Console.Clear();
+    Console.WriteLine($@"(1) Start Game
+(2) Change Difficulty [ Currently: {currentDifficulty.difficultyName} ]
+(3) Change Game Type [ Currently: {currentGameType.gameTypeName} ]
 (4) Show Game History and Total Score
 (5) Exit Program");
 
-    string input = ProcessKey("1234");
+    string input = ProcessKey("12345");
 
+    Console.Clear();
     if (input == "1")
-        SingleGame(player, difficulty, gameTypeCode);
+        SingleGame(player, currentDifficulty, currentGameType);
     else if (input == "2")
     {
-        Console.WriteLine(@"Choose a difficulty:
-(1) Easy   <  5  Rounds >
-(2) Medium <  8  Rounds > 
-(3) Hard   < 10  Rounds >");
+        Console.WriteLine("Choose a difficulty:"); 
+        foreach (var setting in difficultyMap.Values)
+        {
+            Console.WriteLine($"({setting.keyboardKey}) {setting.difficultyName} < {setting.roundcount} Rounds >");
+        }
 
-        difficulty = ProcessKey("123");
+        string difficultySelection = ProcessKey("123");
+        foreach (var setting in difficultyMap.Values)
+        {
+            if (setting.keyboardKey == difficultySelection)
+                currentDifficulty = setting;
+        }
     }
     else if (input == "3")
     {
-        Console.WriteLine(@"Choose a gametype:
-(1) Standard
-(2) Random Operations");
+        Console.WriteLine("Choose a gametype:");
+        foreach (var setting in gameTypeMap.Values)
+        {
+            Console.WriteLine($"({setting.keyboardKey}) {setting.gameTypeName}");
+        }
 
-        gameTypeCode = ProcessKey("12");
+        string gameTypeSelection = ProcessKey("123");
+        foreach (var setting in gameTypeMap.Values)
+        {
+            if (setting.keyboardKey == gameTypeSelection)
+                currentGameType = setting;
+
+        }
     }
     else if (input == "4")
     {
+        Console.WriteLine($"Player Name: {player.Name}");
         player.PrintGames();
-        player.PrintScore();
+        Console.WriteLine($"Total Score: {player.Score}");
+        Console.WriteLine("Press any key to continue");
+        Console.ReadKey();
     }
     else
         break;
 }
 
-static void SingleGame(Player player, string difficulty, string gameTypeCode)
+static void SingleGame(Player player, DifficultySettings currentDifficulty, GameTypeSettings gameTypeCode)
 {
-
-    int roundCount = difficulty == "1" ? 5 : difficulty == "2" ? 8 : 10;
-    int maxOperandRange = difficulty == "1" ? 100 : difficulty == "2" ? 250 : 1000;
 
     int roundsCorrect = 0;
 
-    for (int i = 0; i < roundCount; i++)
+    for (int i = 0; i < currentDifficulty.roundcount; i++)
     {
-        SingleRound(player, gameTypeCode, maxOperandRange, out bool wasCorrect);
+        SingleRound(player, gameTypeCode.gameTypeName, currentDifficulty.maxOperandRange, out bool wasCorrect);
         if (wasCorrect)
             roundsCorrect++;
     }
 
-    Console.WriteLine($"You answered {roundsCorrect} out of {roundCount} questions correctly.");
+    Console.WriteLine($"You answered {roundsCorrect} out of {currentDifficulty.roundcount} questions correctly.");
+    Console.WriteLine("Press any key to continue");
+    Console.ReadKey();
 }
 
-static void SingleRound(Player player, string gameTypeCode, int maxOperandRange, out bool wasCorrect)
+static void SingleRound(Player player, string gameTypeName, int maxOperandRange, out bool wasCorrect)
 {
     Random random = new Random();
 
     string currOperator;
     var operations = new[] { "+", "-", "*", "/" };
 
-    if (gameTypeCode == "1")
+    if (gameTypeName == "Standard")
     {
         Console.WriteLine("Enter the number key next to the operation you wish to solve: ");
         Console.WriteLine(@"(1) Addition
@@ -171,5 +205,24 @@ static string ProcessKey(string validInputs)
         {
             return keyValue;
         }
+        
     }
 }
+
+public enum Difficulty { Easy, Medium, Hard};
+
+public enum GameType { Standard, Random, Timed};
+
+public struct GameTypeSettings
+{
+    public string keyboardKey;
+    public string gameTypeName;
+}
+
+public struct DifficultySettings
+{
+    public string keyboardKey;
+    public string difficultyName;
+    public int roundcount;
+    public int maxOperandRange;
+};

@@ -6,18 +6,26 @@ namespace MathGame.Brogment
 {
     internal class Player
     {
+        // need to make these fields properties with getters / setters
         private string name;
         private int score = 0;
         private List<string> gameHistory = new List<string>();
 
         public Player(string name)
         {
-            this.name = name;
+            Name = name;
         }
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }      
+
+        public int Score { get; set; }
 
         public void IncreaseScore()
         {
-            score += 1;
+            Score += 1;
         }
         public void UpdateGameHistory(string game)
         {
@@ -30,14 +38,6 @@ namespace MathGame.Brogment
             {
                 Console.WriteLine(game);
             }
-        }
-        public void PrintScore()
-        {
-            Console.WriteLine($"Score: {score}");
-        }
-        public void SetScore(int newScore)
-        {
-            score = newScore;
         }
     }
 }
