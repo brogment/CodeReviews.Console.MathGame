@@ -1,20 +1,6 @@
 ﻿
 using MathGame.Brogment;
 
-//why are the below present
-//using System.Collections.ObjectModel;
-//using System.Text;
-
-/*
- 
-Make option for timed gamemode where each question is timed, and they fail question if they go over time?
-
-below isn't working, should make checkmark and big X work?
-Console.OutputEncoding = Encoding.UTF8;
-
- */
-
-
 
 Console.WriteLine("Please enter your name");
 string playerName = Console.ReadLine() ?? "Player1";
@@ -94,9 +80,9 @@ while (true)
         break;
 }
 
-static void SingleGame(Player player, DifficultySettings currentDifficulty, GameTypeSettings gameTypeCode)
+ void SingleGame(Player player, DifficultySettings currentDifficulty, GameTypeSettings gameTypeCode)
 {
-
+    DateTime gameStartTime = DateTime.Now;
     int roundsCorrect = 0;
 
     for (int i = 0; i < currentDifficulty.roundcount; i++)
@@ -106,12 +92,16 @@ static void SingleGame(Player player, DifficultySettings currentDifficulty, Game
             roundsCorrect++;
     }
 
+    DateTime gameEndTime = DateTime.Now;
+    TimeSpan gameTime = gameEndTime - gameStartTime;
+
     Console.WriteLine($"You answered {roundsCorrect} out of {currentDifficulty.roundcount} questions correctly.");
+    Console.WriteLine($"Game Time: {gameTime.TotalSeconds.ToString("F2")} seconds");
     Console.WriteLine("Press any key to continue");
     Console.ReadKey();
 }
 
-static void SingleRound(Player player, string gameTypeName, int maxOperandRange, out bool wasCorrect)
+ void SingleRound(Player player, string gameTypeName, int maxOperandRange, out bool wasCorrect)
 {
     Random random = new Random();
 
@@ -134,7 +124,6 @@ static void SingleRound(Player player, string gameTypeName, int maxOperandRange,
         currOperator = operations[random.Next(0, operations.Length)];
     }
 
-
     int firstOperand = random.Next(maxOperandRange);
     int secondOperand;
 
@@ -153,15 +142,7 @@ static void SingleRound(Player player, string gameTypeName, int maxOperandRange,
 
     Console.WriteLine($"What is the result of {firstOperand} {currOperator} {secondOperand} ? ");
 
-    bool isNumeric;
-    int userAnswer;
-    do
-    {
-        isNumeric = int.TryParse(Console.ReadLine(), out userAnswer);
-        if (!isNumeric)
-            Console.WriteLine("Please enter an integer.");
-    }
-    while (!isNumeric);
+    int userAnswer = getNumericInput();
 
     player.UpdateGameHistory($"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer}");
 
@@ -178,7 +159,22 @@ static void SingleRound(Player player, string gameTypeName, int maxOperandRange,
     }
 }
 
-static int PerformOperation(string operationSelection, int firstOperand, int secondOperand)
+int getNumericInput()
+{
+    bool isNumeric;
+    int userAnswer;
+    do
+    {
+        isNumeric = int.TryParse(Console.ReadLine(), out userAnswer);
+        if (!isNumeric)
+            Console.WriteLine("Please enter an integer.");
+    }
+    while (!isNumeric);
+
+    return userAnswer;
+}
+
+int PerformOperation(string operationSelection, int firstOperand, int secondOperand)
 {
     if (operationSelection == "+")
         return firstOperand + secondOperand;
@@ -192,7 +188,7 @@ static int PerformOperation(string operationSelection, int firstOperand, int sec
         return 0;
 }
 
-static string ProcessKey(string validInputs)
+ string ProcessKey(string validInputs)
 {
     string? keyValue;
     while (true)
@@ -209,17 +205,17 @@ static string ProcessKey(string validInputs)
     }
 }
 
-public enum Difficulty { Easy, Medium, Hard};
+ enum Difficulty { Easy, Medium, Hard};
 
-public enum GameType { Standard, Random, Timed};
+ enum GameType { Standard, Random, Timed};
 
-public struct GameTypeSettings
+ struct GameTypeSettings
 {
     public string keyboardKey;
     public string gameTypeName;
 }
 
-public struct DifficultySettings
+ struct DifficultySettings
 {
     public string keyboardKey;
     public string difficultyName;
