@@ -71,7 +71,10 @@ while (true)
     else if (input == "4")
     {
         Console.WriteLine($"Player Name: {player.Name}");
+
+        
         player.PrintGames();
+
         Console.WriteLine($"Total Score: {player.Score}");
         Console.WriteLine("Press any key to continue");
         Console.ReadKey();
@@ -82,18 +85,27 @@ while (true)
 
  void SingleGame(Player player, DifficultySettings currentDifficulty, GameTypeSettings gameTypeCode)
 {
+    GameRecord gameRecord = new GameRecord(player.GamesPlayed, currentDifficulty.roundcount);
+    
     DateTime gameStartTime = DateTime.Now;
     int roundsCorrect = 0;
 
     for (int i = 0; i < currentDifficulty.roundcount; i++)
     {
-        SingleRound(player, gameTypeCode.gameTypeName, currentDifficulty.maxOperandRange, out bool wasCorrect);
+        
+        gameRecord.AddRound(SingleRound(player, gameTypeCode.gameTypeName, currentDifficulty.maxOperandRange, out bool wasCorrect));
         if (wasCorrect)
             roundsCorrect++;
     }
 
     DateTime gameEndTime = DateTime.Now;
     TimeSpan gameTime = gameEndTime - gameStartTime;
+    gameRecord.TimeLength = gameTime.TotalSeconds;
+    gameRecord.CorrectAnswers = roundsCorrect;
+    
+    player.UpdateGameHistory(gameRecord);
+    player.GamesPlayed++;
+
 
     Console.WriteLine($"You answered {roundsCorrect} out of {currentDifficulty.roundcount} questions correctly.");
     Console.WriteLine($"Game Time: {gameTime.TotalSeconds.ToString("F2")} seconds");
@@ -101,7 +113,7 @@ while (true)
     Console.ReadKey();
 }
 
- void SingleRound(Player player, string gameTypeName, int maxOperandRange, out bool wasCorrect)
+ string SingleRound(Player player, string gameTypeName, int maxOperandRange, out bool wasCorrect)
 {
     Random random = new Random();
 
@@ -144,8 +156,6 @@ while (true)
 
     int userAnswer = getNumericInput();
 
-    player.UpdateGameHistory($"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer}");
-
     if (userAnswer == correctAnswer)
     {
         Console.WriteLine("Correct!");
@@ -157,6 +167,8 @@ while (true)
         Console.WriteLine("Incorrect!");
         wasCorrect = false;
     }
+
+    return $"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer}";
 }
 
 int getNumericInput()
