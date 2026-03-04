@@ -6,8 +6,13 @@ namespace MathGameTests
     public sealed class MathGameUnitTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void GenerateOperands_Division_ReturnsIntegerQuotient()
         {
+            //arrange
+         
+            //act
+
+            //assert
         }
     }
 }

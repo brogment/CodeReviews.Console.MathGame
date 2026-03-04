@@ -4,27 +4,13 @@ using System.Text;
 
 namespace MathGame.Brogment
 {
-    internal class Player
+    internal class Player(string name)
     {
-        private string name;
-        private int gamesPlayed = 0;
         private List<GameRecord> gameHistory = new List<GameRecord>();
+        public string Name { get; set; } = name;
 
-        public Player(string name)
-        {
-            Name = name;
-        }
-        public string Name
-        {
-            get { return name; }
-            set { name = value; }
-        }      
-
-        public int GamesPlayed
-        {
-            get { return gamesPlayed; }
-            set { gamesPlayed = value; }
-        }
+        public int GamesPlayed { get; set; } = 0;
+      
         public int Score { get; set; }
 
         public void IncreaseScore()

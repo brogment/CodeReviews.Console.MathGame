@@ -4,20 +4,16 @@ using System.Text;
 
 namespace MathGame.Brogment
 {
-    internal class GameRecord
+    internal class GameRecord(int id, int totalRounds)
     {
-        private readonly int id;
-        private readonly int totalRounds;
+        private readonly int id = id;
+        private readonly int totalRounds = totalRounds;
 
         private List<String> rounds = new List<String>();
 
         public int CorrectAnswers { get; set; }
         public double TimeLength { get; set; }
-        public GameRecord(int id, int totalRounds)
-        {
-            this.id = id;
-            this.totalRounds = totalRounds;
-        }
+
         public void AddRound(string round)
         {
             rounds.Add(round);
