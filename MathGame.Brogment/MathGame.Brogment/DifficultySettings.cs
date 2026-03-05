@@ -1,4 +1,4 @@
-﻿struct DifficultySettings
+﻿public struct DifficultySettings
 {
     public string keyboardKey;
     public string difficultyName;
@@ -7,4 +7,4 @@
     public int minOperandRange;
 };
 
-enum Difficulty { Easy, Medium, Hard };
+public enum Difficulty { Easy, Medium, Hard };

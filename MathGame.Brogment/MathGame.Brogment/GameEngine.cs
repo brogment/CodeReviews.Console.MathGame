@@ -1,72 +1,82 @@
 ﻿namespace MathGame.Brogment
 {
 
-    internal class GameEngine(Player _player)
+    public class GameEngine(Player _player)
     {
         readonly Random random = new Random();
         protected Player player = _player;
 
-        public static Dictionary<Difficulty, DifficultySettings> difficultyMap = new Dictionary<Difficulty, DifficultySettings>
+        public static readonly Dictionary<Difficulty, DifficultySettings> difficultyMap = new Dictionary<Difficulty, DifficultySettings>
         {
             [Difficulty.Easy] = new DifficultySettings { keyboardKey = "1", difficultyName = "Easy", maxOperandRange = 100, minOperandRange = 0, roundcount = 5 },
             [Difficulty.Medium] = new DifficultySettings { keyboardKey = "2", difficultyName = "Medium", maxOperandRange = 250, minOperandRange = 100, roundcount = 8 },
             [Difficulty.Hard] = new DifficultySettings { keyboardKey = "3", difficultyName = "Hard", maxOperandRange = 1000, minOperandRange = 250, roundcount = 10 }
         };
 
-        public static Dictionary<GameType, GameTypeSettings> gameTypeMap = new Dictionary<GameType, GameTypeSettings>
+        public static readonly Dictionary<GameType, GameTypeSettings> gameTypeMap = new Dictionary<GameType, GameTypeSettings>
         {
             [GameType.Standard] = new GameTypeSettings { keyboardKey = "1", gameTypeName = "Standard" },
             [GameType.Random] = new GameTypeSettings { keyboardKey = "2", gameTypeName = "Random Operations" }
         };
 
-        private GameTypeSettings currentGameType = gameTypeMap[GameType.Standard];
-        private DifficultySettings currentDifficulty = difficultyMap[Difficulty.Easy];
-
-        public GameTypeSettings CurrentGameType 
-        {
-            set { currentGameType = value; }
-            get { return currentGameType; } 
-        }
-        public DifficultySettings CurrentDifficulty 
-        { 
-            set { currentDifficulty = value; }
-            get { return currentDifficulty; } 
-        }
+        public GameTypeSettings CurrentGameType { get; set; } = gameTypeMap[GameType.Standard];
+        public DifficultySettings CurrentDifficulty { get; set; } = difficultyMap[Difficulty.Easy];
+       
 
         public void SingleGame()
         {
-            GameRecord gameRecord = new GameRecord(player.GamesPlayed, currentDifficulty.roundcount);
-
+            GameRecord gameRecord = new GameRecord(player.GamesPlayed, CurrentGameType, CurrentDifficulty);
+            
             DateTime gameStartTime = DateTime.Now;
-            int roundsCorrect = 0;
 
-            for (int i = 0; i < currentDifficulty.roundcount; i++)
+            for (int i = 0; i < CurrentDifficulty.roundcount; i++)
             {
-                gameRecord.AddRound(SingleRound(out bool wasCorrect));
-                if (wasCorrect)
-                    roundsCorrect++;
+                gameRecord.AddRound(SingleRound(gameRecord));
             }
 
             DateTime gameEndTime = DateTime.Now;
             TimeSpan gameTime = gameEndTime - gameStartTime;
             gameRecord.TimeLength = gameTime.TotalSeconds;
-            gameRecord.CorrectAnswers = roundsCorrect;
 
             player.UpdateGameHistory(gameRecord);
+            player.IncreaseScoreAfterGame(gameRecord.CorrectAnswers);
             player.GamesPlayed++;
 
-            Console.WriteLine($"You answered {roundsCorrect} out of {currentDifficulty.roundcount} questions correctly.");
+            Console.WriteLine($"You answered {gameRecord.CorrectAnswers} out of {CurrentDifficulty.roundcount} questions correctly.");
             Console.WriteLine($"Game Time: {gameTime.TotalSeconds.ToString("F2")} seconds");
             Console.WriteLine("Press any key to continue");
             Console.ReadKey();
         }
 
-        public string SingleRound(out bool wasCorrect)
+        public string SingleRound(GameRecord gameRecord)
+        {
+            string currOperator = ChooseOperation();
+
+            (int firstOperand, int secondOperand) = GenerateOperands(currOperator);
+
+            int correctAnswer = PerformOperation(currOperator, firstOperand, secondOperand);
+
+            Console.WriteLine($"What is the result of {firstOperand} {currOperator} {secondOperand} ? ");
+
+            int userAnswer = getNumericInput();
+
+            if (userAnswer == correctAnswer)
+            {
+                Console.WriteLine("Correct!");
+                gameRecord.CorrectAnswers += 1;
+            }
+            else
+                Console.WriteLine("Incorrect!");
+
+            return $"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer}";
+        }
+
+        private string ChooseOperation()
         {
             string currOperator;
             string[] operations = ["+", "-", "*", "/"];
 
-            if (currentGameType.gameTypeName == "Standard")
+            if (CurrentGameType.gameTypeName == "Standard")
             {
                 Console.WriteLine("Enter the number key next to the operation you wish to solve: ");
                 Console.WriteLine(@"(1) Addition
@@ -82,33 +92,13 @@
                 currOperator = operations[random.Next(0, operations.Length)];
             }
 
-            (int firstOperand, int secondOperand) = GenerateOperands(currOperator);
-
-            int correctAnswer = PerformOperation(currOperator, firstOperand, secondOperand);
-
-            Console.WriteLine($"What is the result of {firstOperand} {currOperator} {secondOperand} ? ");
-
-            int userAnswer = getNumericInput();
-
-            if (userAnswer == correctAnswer)
-            {
-                Console.WriteLine("Correct!");
-                player.IncreaseScore();
-                wasCorrect = true;
-            }
-            else
-            {
-                Console.WriteLine("Incorrect!");
-                wasCorrect = false;
-            }
-
-            return $"{firstOperand} {currOperator} {secondOperand} = {correctAnswer} | Your Answer: {userAnswer}";
+            return currOperator;
         }
 
         public (int firstOperand, int secondOperand) GenerateOperands(string operatorSymbol)
         {
-            int lowerLimit = currentDifficulty.minOperandRange;
-            int upperLimmit = currentDifficulty.maxOperandRange;
+            int lowerLimit = CurrentDifficulty.minOperandRange;
+            int upperLimmit = CurrentDifficulty.maxOperandRange;
 
             int firstOperand;
             int secondOperand;

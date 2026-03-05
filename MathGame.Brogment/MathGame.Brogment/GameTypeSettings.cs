@@ -1,7 +1,7 @@
-﻿struct GameTypeSettings
+﻿public struct GameTypeSettings
 {
     public string keyboardKey;
     public string gameTypeName;
 }
 
-enum GameType { Standard, Random, Timed };
+public enum GameType { Standard, Random, Timed };

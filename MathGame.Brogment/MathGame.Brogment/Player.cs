@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MathGame.Brogment
 {
-    internal class Player(string name)
+    public class Player(string name)
     {
         private List<GameRecord> gameHistory = new List<GameRecord>();
         public string Name { get; set; } = name;
@@ -13,9 +13,9 @@ namespace MathGame.Brogment
       
         public int Score { get; set; }
 
-        public void IncreaseScore()
+        public void IncreaseScoreAfterGame(int correctAnswers)
         {
-            Score += 1;
+            Score += correctAnswers;
         }
         public void UpdateGameHistory(GameRecord game)
         {
