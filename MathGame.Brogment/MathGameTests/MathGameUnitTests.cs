@@ -40,5 +40,22 @@ namespace MathGameTests
             //assert
             Assert.AreEqual(expected, actual, "Division not peformed correctly");
         }
+
+        [TestMethod]
+        [DoNotParallelize]
+        [DataRow("20")]
+        [DataRow("34579932")]
+        [DataRow("0")]
+        [DataRow("1")]
+        public void GetNumericInput_InputNum_ReturnsInt(string value)
+        {
+            using (var reader = new StringReader(value)) 
+            {
+
+                Console.SetIn(reader);
+                int result = GameEngine.getNumericInput();
+                Assert.AreEqual(int.Parse(value), result);
+            }
+        }
     }
 }
