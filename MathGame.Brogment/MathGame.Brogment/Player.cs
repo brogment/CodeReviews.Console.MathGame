@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace MathGame.Brogment
 {
     public class Player(string name)
@@ -9,7 +6,7 @@ namespace MathGame.Brogment
         private List<GameRecord> gameHistory = new List<GameRecord>();
         public string Name { get; set; } = name;
 
-        public int GamesPlayed { get; set; } = 0;
+        public int GamesPlayed { get; set; }
       
         public int Score { get; set; }
 
